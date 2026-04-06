@@ -16,13 +16,28 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Tenants", href: "/tenants", icon: Users },
-  { name: "Owners", href: "/owners", icon: Building2 },
-  { name: "Properties", href: "/properties", icon: Home },
-  { name: "Leases", href: "/leases", icon: FileText },
-  { name: "Payments", href: "/payments", icon: DollarSign },
+const navGroups = [
+  {
+    items: [
+      { name: "Dashboard", href: "/", icon: LayoutDashboard },
+      { name: "Payments", href: "/payments", icon: DollarSign },
+    ],
+  },
+  {
+    label: "Renters",
+    items: [
+      { name: "Tenants", href: "/tenants", icon: Users },
+      { name: "Leases", href: "/leases", icon: FileText },
+    ],
+  },
+  {
+    label: "Lessors",
+    items: [
+      { name: "Owners", href: "/owners", icon: Building2 },
+      { name: "Contracts", href: "/contracts-list", icon: FileText },
+      { name: "Properties", href: "/properties", icon: Home },
+    ],
+  },
 ];
 
 export function Sidebar() {
@@ -36,25 +51,34 @@ export function Sidebar() {
 
   const navContent = (
     <nav className="flex flex-col gap-1 px-3 py-4">
-      {navigation.map((item) => {
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.name}
-            href={item.href}
-            onClick={() => setMobileOpen(false)}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-              isActive(item.href)
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            )}
-          >
-            <Icon className="h-4 w-4" />
-            {item.name}
-          </Link>
-        );
-      })}
+      {navGroups.map((group, gi) => (
+        <div key={gi} className={gi > 0 ? "mt-4" : ""}>
+          {group.label && (
+            <p className="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+              {group.label}
+            </p>
+          )}
+          {group.items.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  isActive(item.href)
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                {item.name}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 
