@@ -6,6 +6,8 @@ export const ownerSchema = z.object({
   email: z.email("Invalid email").optional().or(z.literal("")),
   phone: z.string().optional(),
   address: z.string().optional(),
+  feeType: z.string().optional(),
+  feeAmount: z.coerce.number().min(0).optional(),
   notes: z.string().optional(),
 });
 
@@ -56,6 +58,23 @@ export const paymentSchema = z.object({
   periodEnd: z.string().min(1, "Period end is required"),
   method: z.string().min(1, "Payment method is required"),
   referenceNumber: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+export const ownerPayoutSchema = z.object({
+  ownerId: z.string().min(1, "Owner is required"),
+  leaseId: z.string().min(1, "Lease is required"),
+  amount: z.coerce.number().min(0.01, "Amount must be greater than 0"),
+  date: z.string().min(1, "Date is required"),
+  notes: z.string().optional(),
+});
+
+export const securityDepositSchema = z.object({
+  leaseId: z.string().min(1, "Lease is required"),
+  tenantId: z.string().min(1, "Tenant is required"),
+  amount: z.coerce.number().min(0.01, "Amount must be greater than 0"),
+  type: z.string().min(1, "Type is required"),
+  date: z.string().min(1, "Date is required"),
   notes: z.string().optional(),
 });
 

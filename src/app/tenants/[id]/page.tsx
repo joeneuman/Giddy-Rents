@@ -8,7 +8,8 @@ import { DeleteDialog } from "@/components/shared/delete-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { deleteTenant } from "@/actions/tenants";
 import { fullName, formatPhone, formatDate, formatCurrency } from "@/lib/format";
-import { Pencil, Mail, Phone, MapPin, AlertTriangle, Home, DollarSign } from "lucide-react";
+import { getSecurityDepositBalance } from "@/lib/trust";
+import { Pencil, Mail, Phone, MapPin, AlertTriangle, Home, DollarSign, Shield } from "lucide-react";
 
 export default async function TenantDetailPage({
   params,
@@ -16,6 +17,7 @@ export default async function TenantDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const securityBalance = await getSecurityDepositBalance(id);
   const tenant = await db.tenant.findUnique({
     where: { id },
     include: {
@@ -121,6 +123,28 @@ export default async function TenantDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Security Deposit
+          </CardTitle>
+          {tenant.leases.length > 0 && (
+            <Button asChild size="sm" variant="outline">
+              <Link href={`/trust/security-deposit?leaseId=${tenant.leases[0]?.id}`}>
+                Record Deposit
+              </Link>
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Amount Held</span>
+            <span className="text-lg font-bold">{formatCurrency(securityBalance)}</span>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

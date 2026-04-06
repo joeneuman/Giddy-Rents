@@ -14,10 +14,13 @@ model Owner {
   email     String?
   phone     String?
   address   String?
+  feeType   String?
+  feeAmount Float?
   notes     String?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  properties Property[]
+  properties         Property[]
+  trustTransactions  TrustTransaction[]
 }
 
 model Tenant {
@@ -35,6 +38,7 @@ model Tenant {
   updatedAt         DateTime  @updatedAt
   leases            Lease[]
   payments          Payment[]
+  trustTransactions TrustTransaction[]
 }
 
 model Property {
@@ -73,6 +77,7 @@ model Lease {
   updatedAt       DateTime   @updatedAt
   payments        Payment[]
   contracts       Contract[]
+  trustTransactions TrustTransaction[]
 }
 
 model Payment {
@@ -90,6 +95,7 @@ model Payment {
   notes           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  trustTransactions TrustTransaction[]
 }
 
 model Contract {
@@ -101,4 +107,23 @@ model Contract {
   fileSize    Int
   description String?
   uploadedAt  DateTime @default(now())
+}
+
+model TrustTransaction {
+  id          String   @id @default(cuid())
+  type        String
+  amount      Float
+  balance     Float
+  date        DateTime
+  description String?
+  notes       String?
+  paymentId   String?
+  payment     Payment? @relation(fields: [paymentId], references: [id])
+  leaseId     String?
+  lease       Lease?   @relation(fields: [leaseId], references: [id])
+  ownerId     String?
+  owner       Owner?   @relation(fields: [ownerId], references: [id])
+  tenantId    String?
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id])
+  createdAt   DateTime @default(now())
 }

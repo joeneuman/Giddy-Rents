@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { paymentSchema } from "@/lib/validations";
+import { createTrustDeposit } from "@/actions/trust";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -27,6 +28,12 @@ export async function createPayment(formData: FormData) {
       notes: data.notes || null,
     },
   });
+
+  try {
+    await createTrustDeposit(payment.id);
+  } catch (e) {
+    console.error("Failed to create trust deposit:", e);
+  }
 
   redirect(`/payments/${payment.id}`);
 }

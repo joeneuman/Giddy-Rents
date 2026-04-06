@@ -10,6 +10,7 @@ import {
   Home,
   FileText,
   DollarSign,
+  Landmark,
   Menu,
   X,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const navGroups = [
     items: [
       { name: "Dashboard", href: "/", icon: LayoutDashboard },
       { name: "Payments", href: "/payments", icon: DollarSign },
+      { name: "Trust Account", href: "/trust", icon: Landmark },
     ],
   },
   {

@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DeleteDialog } from "@/components/shared/delete-dialog";
 import { deleteOwner } from "@/actions/owners";
-import { fullName, formatPhone, formatDate } from "@/lib/format";
-import { Pencil, Mail, Phone, MapPin, Home } from "lucide-react";
+import { fullName, formatPhone, formatDate, formatCurrency } from "@/lib/format";
+import { getOwnerTrustBalance } from "@/lib/trust";
+import { Pencil, Mail, Phone, MapPin, Home, Landmark, Banknote, DollarSign } from "lucide-react";
 
 export default async function OwnerDetailPage({
   params,
@@ -15,16 +16,28 @@ export default async function OwnerDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const owner = await db.owner.findUnique({
-    where: { id },
-    include: {
-      properties: {
-        orderBy: { name: "asc" },
+  const [owner, trustBalance, recentPayouts] = await Promise.all([
+    db.owner.findUnique({
+      where: { id },
+      include: {
+        properties: { orderBy: { name: "asc" } },
       },
-    },
-  });
+    }),
+    getOwnerTrustBalance(id),
+    db.trustTransaction.findMany({
+      where: { ownerId: id, type: { in: ["owner_payout", "company_fee"] } },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
+  ]);
 
   if (!owner) notFound();
+
+  const feeDisplay = owner.feeType === "percentage"
+    ? `${owner.feeAmount}% of rent`
+    : owner.feeType === "flat"
+      ? `${formatCurrency(owner.feeAmount ?? 0)} flat`
+      : "No fee configured";
 
   return (
     <div className="space-y-6">
@@ -112,6 +125,51 @@ export default async function OwnerDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Landmark className="h-5 w-5" />
+            Trust Account
+          </CardTitle>
+          <Button asChild size="sm">
+            <Link href={`/trust/pay-owner?ownerId=${id}`}>
+              <Banknote className="h-4 w-4 mr-1" />
+              Pay Owner
+            </Link>
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Management Fee</span>
+            <span className="text-sm font-medium">{feeDisplay}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Trust Balance (Owner Funds)</span>
+            <span className="text-lg font-bold">{formatCurrency(trustBalance)}</span>
+          </div>
+
+          {recentPayouts.length > 0 && (
+            <div className="border-t pt-4">
+              <p className="text-sm font-medium mb-2">Recent Payouts</p>
+              <div className="space-y-2">
+                {recentPayouts.map((tx) => (
+                  <div key={tx.id} className="flex items-center justify-between p-2 rounded border text-sm">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-muted-foreground">{tx.description}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-red-600">{formatCurrency(tx.amount)}</span>
+                      <span className="text-xs text-muted-foreground">{formatDate(tx.date)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

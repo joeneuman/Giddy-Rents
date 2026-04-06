@@ -21,6 +21,8 @@ export async function createOwner(formData: FormData) {
       email: data.email || null,
       phone: data.phone || null,
       address: data.address || null,
+      feeType: data.feeType || null,
+      feeAmount: data.feeAmount || null,
       notes: data.notes || null,
     },
   });
@@ -45,6 +47,8 @@ export async function updateOwner(id: string, formData: FormData) {
       email: data.email || null,
       phone: data.phone || null,
       address: data.address || null,
+      feeType: data.feeType || null,
+      feeAmount: data.feeAmount || null,
       notes: data.notes || null,
     },
   });
