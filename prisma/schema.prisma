@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +5,100 @@ generator client {
 
 datasource db {
   provider = "sqlite"
+}
+
+model Owner {
+  id        String     @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  address   String?
+  notes     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  properties Property[]
+}
+
+model Tenant {
+  id                String    @id @default(cuid())
+  firstName         String
+  lastName          String
+  email             String?
+  phone             String?
+  address           String?
+  emergencyName     String?
+  emergencyPhone    String?
+  emergencyRelation String?
+  notes             String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  leases            Lease[]
+  payments          Payment[]
+}
+
+model Property {
+  id         String   @id @default(cuid())
+  name       String
+  address    String
+  city       String
+  state      String
+  zip        String
+  type       String   @default("apartment")
+  bedrooms   Int?
+  bathrooms  Float?
+  sqft       Int?
+  rentAmount Float
+  ownerId    String
+  owner      Owner    @relation(fields: [ownerId], references: [id])
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  leases     Lease[]
+}
+
+model Lease {
+  id              String     @id @default(cuid())
+  propertyId      String
+  property        Property   @relation(fields: [propertyId], references: [id])
+  tenantId        String
+  tenant          Tenant     @relation(fields: [tenantId], references: [id])
+  startDate       DateTime
+  endDate         DateTime?
+  rentAmount      Float
+  securityDeposit Float?
+  status          String     @default("active")
+  notes           String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  payments        Payment[]
+  contracts       Contract[]
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  leaseId         String
+  lease           Lease    @relation(fields: [leaseId], references: [id])
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  amount          Float
+  datePaid        DateTime
+  periodStart     DateTime
+  periodEnd       DateTime
+  method          String
+  referenceNumber String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Contract {
+  id          String   @id @default(cuid())
+  leaseId     String
+  lease       Lease    @relation(fields: [leaseId], references: [id])
+  fileName    String
+  filePath    String
+  fileSize    Int
+  description String?
+  uploadedAt  DateTime @default(now())
 }
