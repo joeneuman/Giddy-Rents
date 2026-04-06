@@ -62,7 +62,7 @@ export function PaymentForm({
             <Select
               name="leaseId"
               defaultValue={defaultLeaseId}
-              onValueChange={(val) => setSelectedLeaseId(val ?? "")}
+              onValueChange={setSelectedLeaseId}
               required
             >
               <SelectTrigger>
