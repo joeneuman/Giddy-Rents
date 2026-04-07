@@ -6,8 +6,6 @@ export const ownerSchema = z.object({
   email: z.email("Invalid email").optional().or(z.literal("")),
   phone: z.string().optional(),
   address: z.string().optional(),
-  feeType: z.string().optional(),
-  feeAmount: z.coerce.number().min(0).optional(),
   notes: z.string().optional(),
 });
 
@@ -34,6 +32,8 @@ export const propertySchema = z.object({
   bathrooms: z.coerce.number().min(0).optional(),
   sqft: z.coerce.number().int().min(0).optional(),
   rentAmount: z.coerce.number().min(0, "Rent amount must be positive"),
+  feeType: z.string().optional(),
+  feeAmount: z.coerce.number().min(0).optional(),
   ownerId: z.string().min(1, "Owner is required"),
   notes: z.string().optional(),
 });

@@ -14,8 +14,6 @@ model Owner {
   email     String?
   phone     String?
   address   String?
-  feeType   String?
-  feeAmount Float?
   notes     String?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -53,6 +51,8 @@ model Property {
   bathrooms  Float?
   sqft       Int?
   rentAmount Float
+  feeType    String?
+  feeAmount  Float?
   ownerId    String
   owner      Owner    @relation(fields: [ownerId], references: [id])
   notes      String?

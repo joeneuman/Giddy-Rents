@@ -35,7 +35,8 @@
       "Bash(ssh -i ~/.ssh/new_do_key root@143.198.105.249 \"cat /opt/phone-system/client/src/App.js\")",
       "Bash(ssh -i ~/.ssh/new_do_key root@143.198.105.249 \"cat /opt/phone-system/client/src/services/api.js\")",
       "Bash(ssh -i ~/.ssh/new_do_key root@143.198.105.249 \"cd /var/www/giddy-rents && git pull && npm install && npm run build && pm2 restart giddy-rents\")",
-      "Bash(ssh -i ~/.ssh/new_do_key root@143.198.105.249 \"cd /var/www/giddy-rents && git pull && npm run build && pm2 restart giddy-rents\")"
+      "Bash(ssh -i ~/.ssh/new_do_key root@143.198.105.249 \"cd /var/www/giddy-rents && git pull && npm run build && pm2 restart giddy-rents\")",
+      "Bash(ssh -i ~/.ssh/new_do_key root@143.198.105.249 \"cd /var/www/giddy-rents && git pull && npm install && npx prisma generate && npx prisma db push && npm run build && pm2 restart giddy-rents\")"
     ]
   }
 }

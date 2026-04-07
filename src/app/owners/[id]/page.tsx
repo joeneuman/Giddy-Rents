@@ -33,12 +33,6 @@ export default async function OwnerDetailPage({
 
   if (!owner) notFound();
 
-  const feeDisplay = owner.feeType === "percentage"
-    ? `${owner.feeAmount}% of rent`
-    : owner.feeType === "flat"
-      ? `${formatCurrency(owner.feeAmount ?? 0)} flat`
-      : "No fee configured";
-
   return (
     <div className="space-y-6">
       <PageHeader
@@ -140,10 +134,6 @@ export default async function OwnerDetailPage({
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Management Fee</span>
-            <span className="text-sm font-medium">{feeDisplay}</span>
-          </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Trust Balance (Owner Funds)</span>
             <span className="text-lg font-bold">{formatCurrency(trustBalance)}</span>

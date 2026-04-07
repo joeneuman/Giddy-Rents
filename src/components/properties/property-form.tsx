@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Property, Owner } from "@/generated/prisma/client";
+import { useState } from "react";
 
 interface PropertyFormProps {
   action: (formData: FormData) => void;
@@ -36,6 +37,8 @@ export function PropertyForm({
   defaultValues,
   submitLabel = "Save",
 }: PropertyFormProps) {
+  const [feeType, setFeeType] = useState(defaultValues?.feeType ?? "");
+
   return (
     <form action={action} className="space-y-6">
       <Card>
@@ -179,6 +182,49 @@ export function PropertyForm({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Management Fee</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="feeType">Fee Type</Label>
+              <Select
+                name="feeType"
+                defaultValue={defaultValues?.feeType ?? ""}
+                onValueChange={setFeeType}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="No fee" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No fee</SelectItem>
+                  <SelectItem value="flat">Flat Rate</SelectItem>
+                  <SelectItem value="percentage">Percentage</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {(feeType === "flat" || feeType === "percentage") && (
+              <div className="space-y-2">
+                <Label htmlFor="feeAmount">
+                  {feeType === "flat" ? "Fee Amount ($)" : "Fee Percentage (%)"}
+                </Label>
+                <Input
+                  id="feeAmount"
+                  name="feeAmount"
+                  type="number"
+                  step={feeType === "percentage" ? "0.1" : "0.01"}
+                  min="0"
+                  defaultValue={defaultValues?.feeAmount ?? ""}
+                  placeholder={feeType === "flat" ? "100.00" : "10"}
+                />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -54,7 +54,7 @@ export async function createOwnerPayout(formData: FormData) {
   });
   if (!lease) return { error: "Lease not found" };
 
-  const fee = calculateFee(owner.feeType, owner.feeAmount, data.amount);
+  const fee = calculateFee(lease.property.feeType, lease.property.feeAmount, data.amount);
   const netPayout = data.amount - fee;
 
   const currentBalance = await getCurrentTrustBalance();
@@ -90,7 +90,7 @@ export async function createOwnerPayout(formData: FormData) {
         amount: -fee,
         balance: afterFee,
         date,
-        description: `Management fee — ${lease.property.name} (${owner.feeType === "percentage" ? `${owner.feeAmount}%` : `$${owner.feeAmount} flat`})`,
+        description: `Management fee — ${lease.property.name} (${lease.property.feeType === "percentage" ? `${lease.property.feeAmount}%` : `$${lease.property.feeAmount} flat`})`,
         leaseId: data.leaseId,
         ownerId: data.ownerId,
       },

@@ -19,11 +19,11 @@ type OwnerWithLeases = {
   id: string;
   firstName: string;
   lastName: string;
-  feeType: string | null;
-  feeAmount: number | null;
   properties: {
     id: string;
     name: string;
+    feeType: string | null;
+    feeAmount: number | null;
     leases: {
       id: string;
       rentAmount: number;
@@ -44,16 +44,16 @@ export function PayOwnerForm({ action, owners, defaultOwnerId }: PayOwnerFormPro
 
   const selectedOwner = owners.find((o) => o.id === selectedOwnerId);
   const leases = selectedOwner?.properties.flatMap((p) =>
-    p.leases.map((l) => ({ ...l, propertyName: p.name }))
+    p.leases.map((l) => ({ ...l, propertyName: p.name, feeType: p.feeType, feeAmount: p.feeAmount }))
   ) || [];
   const selectedLease = leases.find((l) => l.id === selectedLeaseId);
 
   const rentAmount = selectedLease?.rentAmount ?? 0;
-  const fee = selectedOwner
-    ? selectedOwner.feeType === "flat"
-      ? selectedOwner.feeAmount ?? 0
-      : selectedOwner.feeType === "percentage"
-        ? Math.round(rentAmount * (selectedOwner.feeAmount ?? 0)) / 100
+  const fee = selectedLease
+    ? selectedLease.feeType === "flat"
+      ? selectedLease.feeAmount ?? 0
+      : selectedLease.feeType === "percentage"
+        ? Math.round(rentAmount * (selectedLease.feeAmount ?? 0)) / 100
         : 0
     : 0;
   const netPayout = rentAmount - fee;
@@ -82,8 +82,6 @@ export function PayOwnerForm({ action, owners, defaultOwnerId }: PayOwnerFormPro
                 {owners.map((owner) => (
                   <SelectItem key={owner.id} value={owner.id}>
                     {owner.firstName} {owner.lastName}
-                    {owner.feeType === "percentage" ? ` (${owner.feeAmount}% fee)` :
-                     owner.feeType === "flat" ? ` ($${owner.feeAmount} fee)` : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -146,9 +144,9 @@ export function PayOwnerForm({ action, owners, defaultOwnerId }: PayOwnerFormPro
               <div className="flex justify-between text-sm">
                 <span>
                   Management Fee
-                  {selectedOwner.feeType === "percentage"
-                    ? ` (${selectedOwner.feeAmount}%)`
-                    : selectedOwner.feeType === "flat"
+                  {selectedLease.feeType === "percentage"
+                    ? ` (${selectedLease.feeAmount}%)`
+                    : selectedLease.feeType === "flat"
                       ? " (flat)"
                       : ""}
                 </span>
