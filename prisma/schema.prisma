@@ -72,6 +72,8 @@ model Lease {
   rentAmount      Float
   securityDeposit Float?
   status          String     @default("active")
+  ledgerStartDate DateTime?
+  openingBalance  Float      @default(0)
   notes           String?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt

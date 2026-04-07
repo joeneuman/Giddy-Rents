@@ -126,12 +126,20 @@ export default async function OwnerDetailPage({
             <Landmark className="h-5 w-5" />
             Trust Account
           </CardTitle>
-          <Button asChild size="sm">
-            <Link href={`/trust/pay-owner?ownerId=${id}`}>
-              <Banknote className="h-4 w-4 mr-1" />
-              Pay Owner
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild size="sm" variant="outline">
+              <Link href={`/trust/owner-deposit?ownerId=${id}`}>
+                <Landmark className="h-4 w-4 mr-1" />
+                Owner Deposit
+              </Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href={`/trust/pay-owner?ownerId=${id}`}>
+                <Banknote className="h-4 w-4 mr-1" />
+                Pay Owner
+              </Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">

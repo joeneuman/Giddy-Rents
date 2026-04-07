@@ -1,10 +1,11 @@
 import { db } from "@/lib/db";
 
 export async function getCurrentTrustBalance(): Promise<number> {
-  const latest = await db.trustTransaction.findFirst({
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+  // Sum all amounts — this is always accurate regardless of ordering
+  const result = await db.trustTransaction.aggregate({
+    _sum: { amount: true },
   });
-  return latest?.balance ?? 0;
+  return result._sum.amount ?? 0;
 }
 
 export function calculateFee(
@@ -19,14 +20,31 @@ export function calculateFee(
 }
 
 export async function getOwnerTrustBalance(ownerId: string): Promise<number> {
-  const deposits = await db.trustTransaction.aggregate({
+  const result = await db.trustTransaction.aggregate({
     _sum: { amount: true },
     where: {
       ownerId,
-      type: { in: ["deposit", "owner_payout", "company_fee"] },
+      type: { in: ["owner_deposit", "owner_payout", "company_fee"] },
     },
   });
-  return deposits._sum.amount ?? 0;
+  return result._sum.amount ?? 0;
+}
+
+export async function recalculateBalances(): Promise<void> {
+  const transactions = await db.trustTransaction.findMany({
+    orderBy: [{ date: "asc" }, { createdAt: "asc" }, { id: "asc" }],
+  });
+
+  let balance = 0;
+  for (const tx of transactions) {
+    balance += tx.amount;
+    if (Math.abs(tx.balance - balance) > 0.001) {
+      await db.trustTransaction.update({
+        where: { id: tx.id },
+        data: { balance },
+      });
+    }
+  }
 }
 
 export async function getSecurityDepositBalance(tenantId: string): Promise<number> {

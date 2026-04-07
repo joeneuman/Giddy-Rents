@@ -15,23 +15,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Landmark, Banknote, Shield, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { DeleteDialog } from "@/components/shared/delete-dialog";
+import { deleteTrustTransaction } from "@/actions/trust";
+import { Landmark, Banknote, Shield } from "lucide-react";
 import { formatCurrency, formatDate, fullName } from "@/lib/format";
 import { getCurrentTrustBalance } from "@/lib/trust";
 
 const typeConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   deposit: { label: "Rent Deposit", variant: "default" },
+  owner_deposit: { label: "Owner Deposit", variant: "default" },
   owner_payout: { label: "Owner Payout", variant: "secondary" },
   company_fee: { label: "Company Fee", variant: "outline" },
   security_deposit_in: { label: "Security Deposit", variant: "default" },
   security_deposit_refund: { label: "Deposit Refund", variant: "destructive" },
+  company_transfer: { label: "Operating Transfer", variant: "outline" },
 };
 
 export default async function TrustAccountPage() {
-  const [balance, transactions, securityTotal] = await Promise.all([
+  const [balance, transactions, securityTotal, ownerFundsTotal] = await Promise.all([
     getCurrentTrustBalance(),
     db.trustTransaction.findMany({
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      orderBy: [{ date: "desc" }, { createdAt: "desc" }, { id: "desc" }],
       include: {
         owner: true,
         tenant: true,
@@ -42,10 +46,14 @@ export default async function TrustAccountPage() {
       _sum: { amount: true },
       where: { type: { in: ["security_deposit_in", "security_deposit_refund"] } },
     }),
+    db.trustTransaction.aggregate({
+      _sum: { amount: true },
+      where: { type: { in: ["deposit", "owner_deposit", "owner_payout", "company_fee"] } },
+    }),
   ]);
 
   const securityHeld = securityTotal._sum.amount ?? 0;
-  const ownerFunds = balance - securityHeld;
+  const ownerFunds = ownerFundsTotal._sum.amount ?? 0;
 
   return (
     <div className="space-y-6">
@@ -53,7 +61,13 @@ export default async function TrustAccountPage() {
         title="Trust Account"
         description="Company trust account ledger"
         action={
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button asChild variant="outline">
+              <Link href="/trust/owner-deposit">
+                <Landmark className="h-4 w-4 mr-1" />
+                Owner Deposit
+              </Link>
+            </Button>
             <Button asChild variant="outline">
               <Link href="/trust/security-deposit">
                 <Shield className="h-4 w-4 mr-1" />
@@ -125,6 +139,7 @@ export default async function TrustAccountPage() {
                 <TableHead>Related</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
                 <TableHead className="text-right">Balance</TableHead>
+                <TableHead></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -157,6 +172,16 @@ export default async function TrustAccountPage() {
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(tx.balance)}
+                    </TableCell>
+                    <TableCell>
+                      <DeleteDialog
+                        title="Delete Transaction"
+                        description="Are you sure you want to delete this transaction? Running balances will be recalculated."
+                        onDelete={async () => {
+                          "use server";
+                          await deleteTrustTransaction(tx.id);
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 );

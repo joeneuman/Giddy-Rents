@@ -11,6 +11,7 @@ import {
   FileText,
   DollarSign,
   Landmark,
+  ClipboardList,
   Menu,
   X,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const navGroups = [
   {
     items: [
       { name: "Dashboard", href: "/", icon: LayoutDashboard },
+      { name: "Monthly Cycle", href: "/rent-collection", icon: ClipboardList },
       { name: "Payments", href: "/payments", icon: DollarSign },
       { name: "Trust Account", href: "/trust", icon: Landmark },
     ],

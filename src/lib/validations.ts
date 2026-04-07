@@ -46,6 +46,8 @@ export const leaseSchema = z.object({
   rentAmount: z.coerce.number().min(0, "Rent amount must be positive"),
   securityDeposit: z.coerce.number().min(0).optional(),
   status: z.string().default("active"),
+  ledgerStartDate: z.string().optional(),
+  openingBalance: z.coerce.number().min(0).optional(),
   notes: z.string().optional(),
 });
 

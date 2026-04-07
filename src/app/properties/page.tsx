@@ -62,7 +62,7 @@ export default async function PropertiesPage() {
                 <TableHead>Type</TableHead>
                 <TableHead>Owner</TableHead>
                 <TableHead>Current Tenant</TableHead>
-                <TableHead className="text-right">Rent</TableHead>
+                <TableHead className="text-right">Proposed Rent</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

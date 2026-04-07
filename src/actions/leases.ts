@@ -23,6 +23,8 @@ export async function createLease(formData: FormData) {
       rentAmount: data.rentAmount,
       securityDeposit: data.securityDeposit || null,
       status: data.status,
+      ledgerStartDate: data.ledgerStartDate ? new Date(data.ledgerStartDate) : null,
+      openingBalance: data.openingBalance || 0,
       notes: data.notes || null,
     },
   });
@@ -49,6 +51,8 @@ export async function updateLease(id: string, formData: FormData) {
       rentAmount: data.rentAmount,
       securityDeposit: data.securityDeposit || null,
       status: data.status,
+      ledgerStartDate: data.ledgerStartDate ? new Date(data.ledgerStartDate) : null,
+      openingBalance: data.openingBalance || 0,
       notes: data.notes || null,
     },
   });

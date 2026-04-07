@@ -13,6 +13,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { EmptyState } from "@/components/shared/empty-state";
+import { DeleteDialog } from "@/components/shared/delete-dialog";
+import { deletePayment } from "@/actions/payments";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, Plus } from "lucide-react";
 import { formatCurrency, fullName, formatDate } from "@/lib/format";
@@ -60,6 +62,7 @@ export default async function PaymentsPage() {
                 <TableHead>Method</TableHead>
                 <TableHead>Period</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
+                <TableHead></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -99,6 +102,16 @@ export default async function PaymentsPage() {
                   </TableCell>
                   <TableCell className="text-right font-bold">
                     {formatCurrency(payment.amount)}
+                  </TableCell>
+                  <TableCell>
+                    <DeleteDialog
+                      title="Delete Payment"
+                      description="This will also remove the linked trust account deposit. Are you sure?"
+                      onDelete={async () => {
+                        "use server";
+                        await deletePayment(payment.id);
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               ))}

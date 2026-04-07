@@ -86,7 +86,7 @@ export default async function PropertyDetailPage({
               )}
             </div>
             <div className="pt-2 border-t">
-              <p className="text-sm text-muted-foreground">Monthly Rent</p>
+              <p className="text-sm text-muted-foreground">Proposed Rent</p>
               <p className="text-xl font-bold">{formatCurrency(property.rentAmount)}</p>
             </div>
             {property.notes && (

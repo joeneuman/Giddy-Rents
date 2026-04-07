@@ -114,7 +114,7 @@ export function PropertyForm({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="rentAmount">Monthly Rent *</Label>
+              <Label htmlFor="rentAmount">Proposed Rent *</Label>
               <Input
                 id="rentAmount"
                 name="rentAmount"

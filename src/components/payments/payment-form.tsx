@@ -32,6 +32,8 @@ const paymentMethods = [
   { value: "cash", label: "Cash" },
   { value: "check", label: "Check" },
   { value: "bank_transfer", label: "Bank Transfer" },
+  { value: "deposit", label: "Deposit" },
+  { value: "direct_deposit", label: "Direct Deposit" },
   { value: "venmo", label: "Venmo" },
   { value: "zelle", label: "Zelle" },
   { value: "other", label: "Other" },

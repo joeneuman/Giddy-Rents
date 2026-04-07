@@ -27,6 +27,8 @@ interface LeaseFormProps {
     rentAmount: number;
     securityDeposit: number | null;
     status: string;
+    ledgerStartDate: Date | null;
+    openingBalance: number;
     notes: string | null;
   };
   submitLabel?: string;
@@ -149,6 +151,35 @@ export function LeaseForm({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="ledgerStartDate">Ledger Start Date</Label>
+              <Input
+                id="ledgerStartDate"
+                name="ledgerStartDate"
+                type="date"
+                defaultValue={defaultValues?.ledgerStartDate ? formatDateInput(defaultValues.ledgerStartDate) : ""}
+              />
+              <p className="text-xs text-muted-foreground">
+                Balance tracking starts from this date instead of the lease start. Leave blank to use lease start.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="openingBalance">Opening Balance</Label>
+              <Input
+                id="openingBalance"
+                name="openingBalance"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={defaultValues?.openingBalance || ""}
+              />
+              <p className="text-xs text-muted-foreground">
+                Unpaid balance carried over from before the ledger start date.
+              </p>
             </div>
           </div>
         </CardContent>
