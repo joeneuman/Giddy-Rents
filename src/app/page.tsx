@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Home, DollarSign, AlertTriangle } from "lucide-react";
 import { formatCurrency, fullName, formatDate } from "@/lib/format";
+import { SetupFlow } from "@/components/dashboard/setup-flow";
 import { startOfMonth, endOfMonth } from "date-fns";
 
 async function getDashboardData() {
@@ -14,14 +15,20 @@ async function getDashboardData() {
   const monthEnd = endOfMonth(now);
 
   const [
+    ownerCount,
+    tenantCount,
     activeTenantCount,
     totalProperties,
+    totalPayments,
     monthlyPayments,
     recentPayments,
     activeLeases,
   ] = await Promise.all([
+    db.owner.count(),
+    db.tenant.count(),
     db.lease.count({ where: { status: "active" } }),
     db.property.count(),
+    db.payment.count(),
     db.payment.aggregate({
       _sum: { amount: true },
       where: {
@@ -56,8 +63,11 @@ async function getDashboardData() {
   );
 
   return {
+    ownerCount,
+    tenantCount,
     activeTenantCount,
     totalProperties,
+    totalPayments,
     monthlyRevenue: monthlyPayments._sum.amount || 0,
     overdueCount: overdueLeases.length,
     recentPayments,
@@ -73,6 +83,14 @@ export default async function DashboardPage() {
       <PageHeader
         title="Dashboard"
         description="Overview of your rental portfolio"
+      />
+
+      <SetupFlow
+        ownerCount={data.ownerCount}
+        propertyCount={data.totalProperties}
+        tenantCount={data.tenantCount}
+        activeLeaseCount={data.activeTenantCount}
+        paymentCount={data.totalPayments}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
