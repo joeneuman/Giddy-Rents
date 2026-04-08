@@ -12,7 +12,7 @@ import {
   DollarSign,
   Landmark,
   ClipboardList,
-  Settings,
+  SlidersHorizontal,
   Menu,
   X,
 } from "lucide-react";
@@ -46,7 +46,7 @@ const navGroups = [
   },
   {
     items: [
-      { name: "Settings", href: "/settings", icon: Settings },
+      { name: "Settings", href: "/settings", icon: SlidersHorizontal },
     ],
   },
 ];
