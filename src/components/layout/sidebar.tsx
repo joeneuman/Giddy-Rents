@@ -12,6 +12,7 @@ import {
   DollarSign,
   Landmark,
   ClipboardList,
+  Settings,
   Menu,
   X,
 } from "lucide-react";
@@ -43,6 +44,11 @@ const navGroups = [
       { name: "Properties", href: "/properties", icon: Home },
     ],
   },
+  {
+    items: [
+      { name: "Settings", href: "/settings", icon: Settings },
+    ],
+  },
 ];
 
 export function Sidebar() {
@@ -71,7 +77,7 @@ export function Sidebar() {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center gap-3 rounded px-3 py-2 text-sm font-medium transition-colors",
                   isActive(item.href)
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
