@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import { Show, UserButton } from "@clerk/nextjs";
+import { NavSignInButton, NavSignUpButton } from "@/components/marketing/auth-buttons";
 import { Home } from "lucide-react";
 
 export default function MarketingLayout({
@@ -10,7 +11,7 @@ export default function MarketingLayout({
 }) {
   return (
     <>
-      <header className="border-b bg-card">
+      <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg">
             <Home className="h-5 w-5 text-primary" />
@@ -18,13 +19,13 @@ export default function MarketingLayout({
           </Link>
           <div className="flex items-center gap-3">
             <Show when="signed-out">
-              <SignInButton mode="modal" />
-              <SignUpButton mode="modal" />
+              <NavSignInButton />
+              <NavSignUpButton />
             </Show>
             <Show when="signed-in">
               <Link
                 href="/dashboard"
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/85 hover:scale-105 active:scale-100 cursor-pointer"
               >
                 Dashboard
               </Link>
@@ -34,8 +35,8 @@ export default function MarketingLayout({
         </div>
       </header>
       {children}
-      <footer className="border-t bg-card py-8">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 flex flex-col items-center gap-2 text-sm text-muted-foreground">
+      <footer className="border-t bg-card py-10">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 flex flex-col items-center gap-3 text-sm text-muted-foreground">
           <p>Powered by</p>
           <a
             href="https://giddydigs.com"
