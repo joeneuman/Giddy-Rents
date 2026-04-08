@@ -11,10 +11,10 @@ export default function MarketingLayout({
 }) {
   return (
     <>
-      <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b-2 border-[#27272a] bg-[#000000] sticky top-0 z-50">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-            <Home className="h-5 w-5 text-primary" />
+          <Link href="/" className="flex items-center gap-2 font-bold text-lg text-white">
+            <Home className="h-5 w-5 text-[#ECB84A]" />
             Giddy Rents
           </Link>
           <div className="flex items-center gap-3">
@@ -25,7 +25,8 @@ export default function MarketingLayout({
             <Show when="signed-in">
               <Link
                 href="/dashboard"
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/85 hover:scale-105 active:scale-100 cursor-pointer"
+                className="bg-[#ECB84A] text-black px-4 py-2 text-sm font-bold transition-all hover:bg-[#f5c76a] active:scale-95 cursor-pointer"
+                style={{ borderRadius: 4 }}
               >
                 Dashboard
               </Link>
@@ -35,8 +36,8 @@ export default function MarketingLayout({
         </div>
       </header>
       {children}
-      <footer className="border-t bg-card py-10">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 flex flex-col items-center gap-3 text-sm text-muted-foreground">
+      <footer className="border-t-2 border-[#27272a] bg-[#000000] py-10">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 flex flex-col items-center gap-3 text-sm text-[#71717a]">
           <p>Powered by</p>
           <a
             href="https://giddydigs.com"
@@ -46,7 +47,7 @@ export default function MarketingLayout({
           >
             <Image
               src="/giddy-digs-logo.png"
-              alt="Giddy Digs"
+              alt="GIDDY DIGS"
               width={180}
               height={45}
               style={{ width: 180, height: "auto" }}
