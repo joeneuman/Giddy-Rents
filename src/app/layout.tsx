@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
-import { Sidebar } from "@/components/layout/sidebar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Giddy Rents - Property Management",
-  description: "Property management and rent tracking system",
+  description: "Free property management and rent tracking — powered by Giddy Digs",
 };
 
 export default function RootLayout({
@@ -30,13 +30,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
-        <Sidebar />
-        <main className="lg:pl-64">
-          <div className="px-4 py-8 sm:px-6 lg:px-8 pt-16 lg:pt-8">
-            {children}
-          </div>
-        </main>
-        <Toaster position="top-right" richColors />
+        <ClerkProvider>
+          {children}
+          <Toaster position="top-right" richColors />
+        </ClerkProvider>
       </body>
     </html>
   );

@@ -40,7 +40,28 @@
       "Bash(node -e \":*)",
       "Bash(npx tsx:*)",
       "Bash(netstat -ano)",
-      "Bash(npx tsx -e \":*)"
+      "Bash(npx tsx -e \":*)",
+      "Bash(npm uninstall:*)",
+      "Bash(mv contracts:*)",
+      "Bash(mv page.tsx \"\\(dashboard\\)/\")",
+      "Bash(npx next:*)",
+      "Bash(mkdir -p dashboard)",
+      "Bash(mv page.tsx dashboard/)",
+      "Bash(ls -la \"C:/Users/Joe/CODE/Giddy Rents/src/app/\\(dashboard\\)/dashboard/\")",
+      "Bash(curl -s http://localhost:3000/dashboard)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(grep -oP 'Error.*?\\\\\\\\\\\\\\\\n')",
+      "Bash(node -e \"const c = require\\(''@clerk/nextjs''\\); console.log\\(Object.keys\\(c\\).filter\\(k => /show|sign|user/i.test\\(k\\)\\).join\\('', ''\\)\\)\")",
+      "Bash(node -e \"const pkg = require\\(''next/package.json''\\); console.log\\(pkg.version\\)\")",
+      "Bash(curl -s -H \"Accept: text/html\" http://localhost:3000/)",
+      "Bash(\"C:/Users/Joe/CODE/Giddy Rents/tmp_output.txt\")",
+      "Bash(node -e \"const fs=require\\(''fs''\\); const d=fs.readFileSync\\(''C:/Users/Joe/CODE/Giddy Rents/tmp_output.txt'',''utf8''\\); const m=d.match\\(/digest.{0,200}/g\\); if\\(m\\) m.forEach\\(x=>console.log\\(x\\)\\);\")",
+      "Bash(curl -sI http://localhost:3000/)",
+      "Bash(node -e \"const pkg = require\\(''@clerk/nextjs/package.json''\\); console.log\\(pkg.version\\)\")",
+      "Bash(node -e \"let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>console.log\\(JSON.parse\\(d\\).version\\)\\)\")",
+      "Bash(ssh -i \"/c/Users/Joe/.ssh/id_ed25519\" -o StrictHostKeyChecking=no root@143.198.105.249 \"echo connected\")",
+      "Bash(ssh -i \"$HOME/.ssh/id_ed25519\" -o StrictHostKeyChecking=no root@143.198.105.249 \"echo connected\")",
+      "Bash(ssh -v -i \"$HOME/.ssh/id_ed25519\" root@143.198.105.249 \"echo test\")"
     ]
   }
 }

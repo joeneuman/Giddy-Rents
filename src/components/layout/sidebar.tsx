@@ -16,12 +16,13 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import { UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 
 const navGroups = [
   {
     items: [
-      { name: "Dashboard", href: "/", icon: LayoutDashboard },
+      { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { name: "Monthly Cycle", href: "/rent-collection", icon: ClipboardList },
       { name: "Payments", href: "/payments", icon: DollarSign },
       { name: "Trust Account", href: "/trust", icon: Landmark },
@@ -49,7 +50,7 @@ export function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isActive = (href: string) => {
-    if (href === "/") return pathname === "/";
+    if (href === "/dashboard") return pathname === "/dashboard";
     return pathname.startsWith(href);
   };
 
@@ -114,11 +115,12 @@ export function Sidebar() {
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex h-14 items-center border-b px-6">
-          <Link href="/" className="flex items-center gap-2 font-bold text-lg">
+        <div className="flex h-14 items-center justify-between border-b px-6">
+          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-lg">
             <Home className="h-5 w-5 text-primary" />
             Giddy Rents
           </Link>
+          <UserButton />
         </div>
         {navContent}
       </aside>
