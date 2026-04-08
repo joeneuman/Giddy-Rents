@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { SecurityDepositForm } from "@/components/trust/security-deposit-form";
 import { createSecurityDeposit } from "@/actions/trust";
@@ -11,9 +12,10 @@ export default async function SecurityDepositPage({
   searchParams: Promise<{ leaseId?: string }>;
 }) {
   const { leaseId } = await searchParams;
+  const userId = await getUserId();
 
   const leases = await db.lease.findMany({
-    where: { status: "active" },
+    where: { userId, status: "active" },
     orderBy: { createdAt: "desc" },
     include: {
       tenant: { select: { firstName: true, lastName: true } },

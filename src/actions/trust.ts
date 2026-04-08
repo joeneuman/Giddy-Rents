@@ -1,14 +1,16 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { getCurrentTrustBalance, calculateFee, recalculateBalances } from "@/lib/trust";
 import { ownerPayoutSchema, securityDepositSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createTrustDeposit(paymentId: string) {
-  const payment = await db.payment.findUnique({
-    where: { id: paymentId },
+  const userId = await getUserId();
+  const payment = await db.payment.findFirst({
+    where: { id: paymentId, userId },
     include: {
       lease: { include: { property: true } },
       tenant: true,
@@ -19,6 +21,7 @@ export async function createTrustDeposit(paymentId: string) {
 
   await db.trustTransaction.create({
     data: {
+      userId,
       type: "deposit",
       amount: payment.amount,
       balance: 0,
@@ -31,10 +34,11 @@ export async function createTrustDeposit(paymentId: string) {
     },
   });
 
-  await recalculateBalances();
+  await recalculateBalances(userId);
 }
 
 export async function createOwnerPayout(formData: FormData) {
+  const userId = await getUserId();
   const raw = Object.fromEntries(formData);
   const parsed = ownerPayoutSchema.safeParse(raw);
 
@@ -44,11 +48,11 @@ export async function createOwnerPayout(formData: FormData) {
 
   const data = parsed.data;
 
-  const owner = await db.owner.findUnique({ where: { id: data.ownerId } });
+  const owner = await db.owner.findFirst({ where: { id: data.ownerId, userId } });
   if (!owner) return { error: "Owner not found" };
 
-  const lease = await db.lease.findUnique({
-    where: { id: data.leaseId },
+  const lease = await db.lease.findFirst({
+    where: { id: data.leaseId, userId },
     include: { property: true, tenant: true },
   });
   if (!lease) return { error: "Lease not found" };
@@ -56,7 +60,7 @@ export async function createOwnerPayout(formData: FormData) {
   const fee = calculateFee(lease.property.feeType, lease.property.feeAmount, data.amount);
   const netPayout = data.amount - fee;
 
-  const currentBalance = await getCurrentTrustBalance();
+  const currentBalance = await getCurrentTrustBalance(userId);
   if (netPayout + fee > currentBalance) {
     return { error: "Insufficient trust account balance" };
   }
@@ -65,6 +69,7 @@ export async function createOwnerPayout(formData: FormData) {
 
   await db.trustTransaction.create({
     data: {
+      userId,
       type: "owner_payout",
       amount: -netPayout,
       balance: 0,
@@ -80,6 +85,7 @@ export async function createOwnerPayout(formData: FormData) {
   if (fee > 0) {
     await db.trustTransaction.create({
       data: {
+        userId,
         type: "company_fee",
         amount: -fee,
         balance: 0,
@@ -91,12 +97,13 @@ export async function createOwnerPayout(formData: FormData) {
     });
   }
 
-  await recalculateBalances();
+  await recalculateBalances(userId);
   revalidatePath("/trust");
   redirect("/trust");
 }
 
 export async function createSecurityDeposit(formData: FormData) {
+  const userId = await getUserId();
   const raw = Object.fromEntries(formData);
   const parsed = securityDepositSchema.safeParse(raw);
 
@@ -109,20 +116,21 @@ export async function createSecurityDeposit(formData: FormData) {
   const amount = isRefund ? -data.amount : data.amount;
 
   if (isRefund) {
-    const currentBalance = await getCurrentTrustBalance();
+    const currentBalance = await getCurrentTrustBalance(userId);
     if (currentBalance + amount < 0) {
       return { error: "Insufficient trust account balance for refund" };
     }
   }
 
-  const lease = await db.lease.findUnique({
-    where: { id: data.leaseId },
+  const lease = await db.lease.findFirst({
+    where: { id: data.leaseId, userId },
     include: { property: true, tenant: true },
   });
   if (!lease) return { error: "Lease not found" };
 
   await db.trustTransaction.create({
     data: {
+      userId,
       type: isRefund ? "security_deposit_refund" : "security_deposit_in",
       amount,
       balance: 0,
@@ -134,12 +142,13 @@ export async function createSecurityDeposit(formData: FormData) {
     },
   });
 
-  await recalculateBalances();
+  await recalculateBalances(userId);
   revalidatePath("/trust");
   redirect("/trust");
 }
 
 export async function createOwnerDeposit(formData: FormData) {
+  const userId = await getUserId();
   const ownerId = formData.get("ownerId") as string;
   const amount = parseFloat(formData.get("amount") as string);
   const date = formData.get("date") as string;
@@ -150,17 +159,18 @@ export async function createOwnerDeposit(formData: FormData) {
     return { error: "Owner, amount, and date are required" };
   }
 
-  const owner = await db.owner.findUnique({ where: { id: ownerId } });
+  const owner = await db.owner.findFirst({ where: { id: ownerId, userId } });
   if (!owner) return { error: "Owner not found" };
 
   let propertyName = "";
   if (propertyId && propertyId !== "none") {
-    const property = await db.property.findUnique({ where: { id: propertyId } });
+    const property = await db.property.findFirst({ where: { id: propertyId, userId } });
     propertyName = property ? ` — ${property.name}` : "";
   }
 
   await db.trustTransaction.create({
     data: {
+      userId,
       type: "owner_deposit",
       amount,
       balance: 0,
@@ -171,12 +181,13 @@ export async function createOwnerDeposit(formData: FormData) {
     },
   });
 
-  await recalculateBalances();
+  await recalculateBalances(userId);
   revalidatePath("/trust");
   redirect("/trust");
 }
 
 export async function payOwnerFromCycle(formData: FormData) {
+  const userId = await getUserId();
   const ownerId = formData.get("ownerId") as string;
   const leaseId = formData.get("leaseId") as string;
   const amount = parseFloat(formData.get("amount") as string);
@@ -186,11 +197,11 @@ export async function payOwnerFromCycle(formData: FormData) {
     return { error: "Missing required fields" };
   }
 
-  const owner = await db.owner.findUnique({ where: { id: ownerId } });
+  const owner = await db.owner.findFirst({ where: { id: ownerId, userId } });
   if (!owner) return { error: "Owner not found" };
 
-  const lease = await db.lease.findUnique({
-    where: { id: leaseId },
+  const lease = await db.lease.findFirst({
+    where: { id: leaseId, userId },
     include: { property: true, tenant: true },
   });
   if (!lease) return { error: "Lease not found" };
@@ -198,7 +209,7 @@ export async function payOwnerFromCycle(formData: FormData) {
   const fee = calculateFee(lease.property.feeType, lease.property.feeAmount, amount);
   const netPayout = amount - fee;
 
-  const currentBalance = await getCurrentTrustBalance();
+  const currentBalance = await getCurrentTrustBalance(userId);
   if (netPayout + fee > currentBalance) {
     return { error: "Insufficient trust account balance" };
   }
@@ -207,6 +218,7 @@ export async function payOwnerFromCycle(formData: FormData) {
 
   await db.trustTransaction.create({
     data: {
+      userId,
       type: "owner_payout",
       amount: -netPayout,
       balance: 0,
@@ -221,6 +233,7 @@ export async function payOwnerFromCycle(formData: FormData) {
   if (fee > 0) {
     await db.trustTransaction.create({
       data: {
+        userId,
         type: "company_fee",
         amount: -fee,
         balance: 0,
@@ -232,12 +245,13 @@ export async function payOwnerFromCycle(formData: FormData) {
     });
   }
 
-  await recalculateBalances();
+  await recalculateBalances(userId);
   revalidatePath("/rent-collection");
   redirect("/rent-collection");
 }
 
 export async function transferToOperating(formData: FormData) {
+  const userId = await getUserId();
   const amount = parseFloat(formData.get("amount") as string);
   const date = formData.get("date") as string;
 
@@ -245,13 +259,14 @@ export async function transferToOperating(formData: FormData) {
     return { error: "Amount and date are required" };
   }
 
-  const currentBalance = await getCurrentTrustBalance();
+  const currentBalance = await getCurrentTrustBalance(userId);
   if (amount > currentBalance) {
     return { error: "Insufficient trust account balance" };
   }
 
   await db.trustTransaction.create({
     data: {
+      userId,
       type: "company_transfer",
       amount: -amount,
       balance: 0,
@@ -260,14 +275,15 @@ export async function transferToOperating(formData: FormData) {
     },
   });
 
-  await recalculateBalances();
+  await recalculateBalances(userId);
   revalidatePath("/rent-collection");
   redirect("/rent-collection");
 }
 
 export async function deleteTrustTransaction(id: string) {
-  await db.trustTransaction.delete({ where: { id } });
-  await recalculateBalances();
+  const userId = await getUserId();
+  await db.trustTransaction.delete({ where: { id, userId } });
+  await recalculateBalances(userId);
   revalidatePath("/trust");
   redirect("/trust");
 }

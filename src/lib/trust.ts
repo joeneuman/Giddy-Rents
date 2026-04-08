@@ -1,9 +1,9 @@
 import { db } from "@/lib/db";
 
-export async function getCurrentTrustBalance(): Promise<number> {
-  // Sum all amounts — this is always accurate regardless of ordering
+export async function getCurrentTrustBalance(userId: string): Promise<number> {
   const result = await db.trustTransaction.aggregate({
     _sum: { amount: true },
+    where: { userId },
   });
   return result._sum.amount ?? 0;
 }
@@ -19,10 +19,11 @@ export function calculateFee(
   return 0;
 }
 
-export async function getOwnerTrustBalance(ownerId: string): Promise<number> {
+export async function getOwnerTrustBalance(userId: string, ownerId: string): Promise<number> {
   const result = await db.trustTransaction.aggregate({
     _sum: { amount: true },
     where: {
+      userId,
       ownerId,
       type: { in: ["owner_deposit", "owner_payout", "company_fee"] },
     },
@@ -30,8 +31,9 @@ export async function getOwnerTrustBalance(ownerId: string): Promise<number> {
   return result._sum.amount ?? 0;
 }
 
-export async function recalculateBalances(): Promise<void> {
+export async function recalculateBalances(userId: string): Promise<void> {
   const transactions = await db.trustTransaction.findMany({
+    where: { userId },
     orderBy: [{ date: "asc" }, { createdAt: "asc" }, { id: "asc" }],
   });
 
@@ -47,10 +49,11 @@ export async function recalculateBalances(): Promise<void> {
   }
 }
 
-export async function getSecurityDepositBalance(tenantId: string): Promise<number> {
+export async function getSecurityDepositBalance(userId: string, tenantId: string): Promise<number> {
   const result = await db.trustTransaction.aggregate({
     _sum: { amount: true },
     where: {
+      userId,
       tenantId,
       type: { in: ["security_deposit_in", "security_deposit_refund"] },
     },

@@ -9,6 +9,7 @@ datasource db {
 
 model Owner {
   id        String     @id @default(cuid())
+  userId    String
   firstName String
   lastName  String
   email     String?
@@ -19,10 +20,13 @@ model Owner {
   updatedAt DateTime   @updatedAt
   properties         Property[]
   trustTransactions  TrustTransaction[]
+
+  @@index([userId])
 }
 
 model Tenant {
   id                String    @id @default(cuid())
+  userId            String
   firstName         String
   lastName          String
   email             String?
@@ -37,10 +41,13 @@ model Tenant {
   leases            Lease[]
   payments          Payment[]
   trustTransactions TrustTransaction[]
+
+  @@index([userId])
 }
 
 model Property {
   id         String   @id @default(cuid())
+  userId     String
   name       String
   address    String
   city       String
@@ -59,10 +66,13 @@ model Property {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   leases     Lease[]
+
+  @@index([userId])
 }
 
 model Lease {
   id              String     @id @default(cuid())
+  userId          String
   propertyId      String
   property        Property   @relation(fields: [propertyId], references: [id])
   tenantId        String
@@ -80,10 +90,13 @@ model Lease {
   payments        Payment[]
   contracts       Contract[]
   trustTransactions TrustTransaction[]
+
+  @@index([userId])
 }
 
 model Payment {
   id              String   @id @default(cuid())
+  userId          String
   leaseId         String
   lease           Lease    @relation(fields: [leaseId], references: [id])
   tenantId        String
@@ -98,10 +111,13 @@ model Payment {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   trustTransactions TrustTransaction[]
+
+  @@index([userId])
 }
 
 model Contract {
   id          String   @id @default(cuid())
+  userId      String
   leaseId     String
   lease       Lease    @relation(fields: [leaseId], references: [id])
   fileName    String
@@ -109,10 +125,13 @@ model Contract {
   fileSize    Int
   description String?
   uploadedAt  DateTime @default(now())
+
+  @@index([userId])
 }
 
 model TrustTransaction {
   id          String   @id @default(cuid())
+  userId      String
   type        String
   amount      Float
   balance     Float
@@ -128,4 +147,6 @@ model TrustTransaction {
   tenantId    String?
   tenant      Tenant?  @relation(fields: [tenantId], references: [id])
   createdAt   DateTime @default(now())
+
+  @@index([userId])
 }

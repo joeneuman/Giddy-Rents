@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +21,9 @@ import { DollarSign, Plus } from "lucide-react";
 import { formatCurrency, fullName, formatDate } from "@/lib/format";
 
 export default async function PaymentsPage() {
+  const userId = await getUserId();
   const payments = await db.payment.findMany({
+    where: { userId },
     orderBy: { datePaid: "desc" },
     include: {
       tenant: true,

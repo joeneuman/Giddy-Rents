@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Home, DollarSign, AlertTriangle } from "lucide-react";
@@ -10,6 +11,7 @@ import { SetupFlow } from "@/components/dashboard/setup-flow";
 import { startOfMonth, endOfMonth } from "date-fns";
 
 async function getDashboardData() {
+  const userId = await getUserId();
   const now = new Date();
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
@@ -24,18 +26,20 @@ async function getDashboardData() {
     recentPayments,
     activeLeases,
   ] = await Promise.all([
-    db.owner.count(),
-    db.tenant.count(),
-    db.lease.count({ where: { status: "active" } }),
-    db.property.count(),
-    db.payment.count(),
+    db.owner.count({ where: { userId } }),
+    db.tenant.count({ where: { userId } }),
+    db.lease.count({ where: { status: "active", userId } }),
+    db.property.count({ where: { userId } }),
+    db.payment.count({ where: { userId } }),
     db.payment.aggregate({
       _sum: { amount: true },
       where: {
+        userId,
         datePaid: { gte: monthStart, lte: monthEnd },
       },
     }),
     db.payment.findMany({
+      where: { userId },
       orderBy: { datePaid: "desc" },
       take: 8,
       include: {
@@ -44,7 +48,7 @@ async function getDashboardData() {
       },
     }),
     db.lease.findMany({
-      where: { status: "active" },
+      where: { status: "active", userId },
       include: {
         tenant: true,
         property: true,

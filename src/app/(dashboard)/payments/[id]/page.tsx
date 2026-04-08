@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +16,9 @@ export default async function PaymentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const payment = await db.payment.findUnique({
-    where: { id },
+  const userId = await getUserId();
+  const payment = await db.payment.findFirst({
+    where: { id, userId },
     include: {
       tenant: true,
       lease: { include: { property: true } },

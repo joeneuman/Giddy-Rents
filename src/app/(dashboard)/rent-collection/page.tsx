@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -53,6 +54,7 @@ function calculateTotalRentOwed(leaseStart: Date, rentAmount: number, now: Date)
 }
 
 export default async function MonthlyCyclePage() {
+  const userId = await getUserId();
   const now = new Date();
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
@@ -62,7 +64,7 @@ export default async function MonthlyCyclePage() {
 
   // Fetch all active leases with ALL payments (for running balance) and this month's owner payouts
   const leases = await db.lease.findMany({
-    where: { status: "active" },
+    where: { status: "active", userId },
     include: {
       tenant: true,
       property: { include: { owner: true } },
@@ -83,12 +85,14 @@ export default async function MonthlyCyclePage() {
     db.trustTransaction.aggregate({
       _sum: { amount: true },
       where: {
+        userId,
         type: "company_fee",
         date: { gte: monthStart, lte: monthEnd },
       },
     }),
     db.trustTransaction.findFirst({
       where: {
+        userId,
         type: "company_transfer",
         date: { gte: monthStart, lte: monthEnd },
       },

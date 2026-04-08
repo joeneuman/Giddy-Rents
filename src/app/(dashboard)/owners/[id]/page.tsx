@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,16 +17,17 @@ export default async function OwnerDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const userId = await getUserId();
   const [owner, trustBalance, recentPayouts] = await Promise.all([
-    db.owner.findUnique({
-      where: { id },
+    db.owner.findFirst({
+      where: { id, userId },
       include: {
         properties: { orderBy: { name: "asc" } },
       },
     }),
-    getOwnerTrustBalance(id),
+    getOwnerTrustBalance(userId, id),
     db.trustTransaction.findMany({
-      where: { ownerId: id, type: { in: ["owner_payout", "company_fee"] } },
+      where: { ownerId: id, userId, type: { in: ["owner_payout", "company_fee"] } },
       orderBy: { createdAt: "desc" },
       take: 5,
     }),

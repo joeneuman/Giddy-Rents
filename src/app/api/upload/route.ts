@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { randomUUID } from "crypto";
 
 export async function POST(request: NextRequest) {
+  const userId = await getUserId();
   const formData = await request.formData();
   const file = formData.get("file") as File | null;
   const leaseId = formData.get("leaseId") as string | null;
@@ -35,6 +37,7 @@ export async function POST(request: NextRequest) {
 
   const contract = await db.contract.create({
     data: {
+      userId,
       leaseId,
       fileName: file.name,
       filePath: storedFileName,

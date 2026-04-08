@@ -1,11 +1,13 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { tenantSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createTenant(formData: FormData) {
+  const userId = await getUserId();
   const raw = Object.fromEntries(formData);
   const parsed = tenantSchema.safeParse(raw);
 
@@ -16,6 +18,7 @@ export async function createTenant(formData: FormData) {
   const data = parsed.data;
   const tenant = await db.tenant.create({
     data: {
+      userId,
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email || null,
@@ -32,6 +35,7 @@ export async function createTenant(formData: FormData) {
 }
 
 export async function updateTenant(id: string, formData: FormData) {
+  const userId = await getUserId();
   const raw = Object.fromEntries(formData);
   const parsed = tenantSchema.safeParse(raw);
 
@@ -41,7 +45,7 @@ export async function updateTenant(id: string, formData: FormData) {
 
   const data = parsed.data;
   await db.tenant.update({
-    where: { id },
+    where: { id, userId },
     data: {
       firstName: data.firstName,
       lastName: data.lastName,
@@ -59,12 +63,13 @@ export async function updateTenant(id: string, formData: FormData) {
 }
 
 export async function deleteTenant(id: string) {
-  const leaseCount = await db.lease.count({ where: { tenantId: id } });
+  const userId = await getUserId();
+  const leaseCount = await db.lease.count({ where: { tenantId: id, userId } });
   if (leaseCount > 0) {
     return { error: "Cannot delete tenant with linked leases. Remove leases first." };
   }
 
-  await db.tenant.delete({ where: { id } });
+  await db.tenant.delete({ where: { id, userId } });
   revalidatePath("/tenants");
   redirect("/tenants");
 }

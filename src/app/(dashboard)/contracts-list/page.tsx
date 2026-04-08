@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import {
   Table,
@@ -23,7 +24,9 @@ function formatFileSize(bytes: number): string {
 }
 
 export default async function ContractsListPage() {
+  const userId = await getUserId();
   const contracts = await db.contract.findMany({
+    where: { userId },
     orderBy: { uploadedAt: "desc" },
     include: {
       lease: {

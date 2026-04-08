@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +19,9 @@ import { Users, Plus } from "lucide-react";
 import { fullName, formatPhone } from "@/lib/format";
 
 export default async function TenantsPage() {
+  const userId = await getUserId();
   const tenants = await db.tenant.findMany({
+    where: { userId },
     orderBy: { lastName: "asc" },
     include: {
       leases: {

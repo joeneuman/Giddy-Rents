@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { paymentSchema } from "@/lib/validations";
 import { createTrustDeposit } from "@/actions/trust";
 import { recalculateBalances } from "@/lib/trust";
@@ -8,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createPayment(formData: FormData) {
+  const userId = await getUserId();
   const raw = Object.fromEntries(formData);
   const parsed = paymentSchema.safeParse(raw);
 
@@ -18,6 +20,7 @@ export async function createPayment(formData: FormData) {
   const data = parsed.data;
   const payment = await db.payment.create({
     data: {
+      userId,
       leaseId: data.leaseId,
       tenantId: data.tenantId,
       amount: data.amount,
@@ -40,6 +43,7 @@ export async function createPayment(formData: FormData) {
 }
 
 export async function createPaymentFromCollection(formData: FormData) {
+  const userId = await getUserId();
   const raw = Object.fromEntries(formData);
   const parsed = paymentSchema.safeParse(raw);
 
@@ -50,6 +54,7 @@ export async function createPaymentFromCollection(formData: FormData) {
   const data = parsed.data;
   const payment = await db.payment.create({
     data: {
+      userId,
       leaseId: data.leaseId,
       tenantId: data.tenantId,
       amount: data.amount,
@@ -73,9 +78,10 @@ export async function createPaymentFromCollection(formData: FormData) {
 }
 
 export async function deletePayment(id: string) {
-  await db.trustTransaction.deleteMany({ where: { paymentId: id } });
-  await db.payment.delete({ where: { id } });
-  await recalculateBalances();
+  const userId = await getUserId();
+  await db.trustTransaction.deleteMany({ where: { paymentId: id, userId } });
+  await db.payment.delete({ where: { id, userId } });
+  await recalculateBalances(userId);
   revalidatePath("/payments");
   revalidatePath("/trust");
   revalidatePath("/rent-collection");

@@ -1,12 +1,14 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { unlink } from "fs/promises";
 import path from "path";
 import { revalidatePath } from "next/cache";
 
 export async function deleteContract(id: string, leaseId: string) {
-  const contract = await db.contract.findUnique({ where: { id } });
+  const userId = await getUserId();
+  const contract = await db.contract.findFirst({ where: { id, userId } });
   if (!contract) return;
 
   try {

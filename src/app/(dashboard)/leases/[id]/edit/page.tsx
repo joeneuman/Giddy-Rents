@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { LeaseForm } from "@/components/leases/lease-form";
 import { updateLease } from "@/actions/leases";
@@ -10,10 +11,12 @@ export default async function EditLeasePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const userId = await getUserId();
   const [lease, tenants, properties] = await Promise.all([
-    db.lease.findUnique({ where: { id } }),
-    db.tenant.findMany({ orderBy: { lastName: "asc" } }),
+    db.lease.findFirst({ where: { id, userId } }),
+    db.tenant.findMany({ where: { userId }, orderBy: { lastName: "asc" } }),
     db.property.findMany({
+      where: { userId },
       orderBy: { name: "asc" },
       include: { owner: { select: { firstName: true, lastName: true } } },
     }),

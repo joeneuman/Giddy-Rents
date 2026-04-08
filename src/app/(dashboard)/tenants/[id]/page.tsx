@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,9 +18,10 @@ export default async function TenantDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const securityBalance = await getSecurityDepositBalance(id);
-  const tenant = await db.tenant.findUnique({
-    where: { id },
+  const userId = await getUserId();
+  const securityBalance = await getSecurityDepositBalance(userId, id);
+  const tenant = await db.tenant.findFirst({
+    where: { id, userId },
     include: {
       leases: {
         include: { property: true },

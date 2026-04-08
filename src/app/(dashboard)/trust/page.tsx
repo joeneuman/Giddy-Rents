@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,9 +33,12 @@ const typeConfig: Record<string, { label: string; variant: "default" | "secondar
 };
 
 export default async function TrustAccountPage() {
+  const userId = await getUserId();
+
   const [balance, transactions, securityTotal, ownerFundsTotal] = await Promise.all([
-    getCurrentTrustBalance(),
+    getCurrentTrustBalance(userId),
     db.trustTransaction.findMany({
+      where: { userId },
       orderBy: [{ date: "desc" }, { createdAt: "desc" }, { id: "desc" }],
       include: {
         owner: true,
@@ -44,11 +48,11 @@ export default async function TrustAccountPage() {
     }),
     db.trustTransaction.aggregate({
       _sum: { amount: true },
-      where: { type: { in: ["security_deposit_in", "security_deposit_refund"] } },
+      where: { userId, type: { in: ["security_deposit_in", "security_deposit_refund"] } },
     }),
     db.trustTransaction.aggregate({
       _sum: { amount: true },
-      where: { type: { in: ["deposit", "owner_deposit", "owner_payout", "company_fee"] } },
+      where: { userId, type: { in: ["deposit", "owner_deposit", "owner_payout", "company_fee"] } },
     }),
   ]);
 

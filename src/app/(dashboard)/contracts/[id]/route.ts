@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { readFile } from "fs/promises";
 import path from "path";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const contract = await db.contract.findUnique({ where: { id } });
+  const userId = await getUserId();
+  const contract = await db.contract.findUnique({ where: { id, userId } });
 
   if (!contract) {
     return NextResponse.json({ error: "Contract not found" }, { status: 404 });

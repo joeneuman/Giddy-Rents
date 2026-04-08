@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { TenantForm } from "@/components/tenants/tenant-form";
 import { updateTenant } from "@/actions/tenants";
@@ -11,7 +12,8 @@ export default async function EditTenantPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const tenant = await db.tenant.findUnique({ where: { id } });
+  const userId = await getUserId();
+  const tenant = await db.tenant.findFirst({ where: { id, userId } });
 
   if (!tenant) notFound();
 

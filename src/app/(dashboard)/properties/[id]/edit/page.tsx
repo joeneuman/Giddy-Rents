@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { PropertyForm } from "@/components/properties/property-form";
 import { updateProperty } from "@/actions/properties";
@@ -10,9 +11,10 @@ export default async function EditPropertyPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const userId = await getUserId();
   const [property, owners] = await Promise.all([
-    db.property.findUnique({ where: { id } }),
-    db.owner.findMany({ orderBy: { lastName: "asc" } }),
+    db.property.findFirst({ where: { id, userId } }),
+    db.owner.findMany({ where: { userId }, orderBy: { lastName: "asc" } }),
   ]);
 
   if (!property) notFound();

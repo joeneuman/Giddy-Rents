@@ -1,11 +1,13 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { getUserId } from "@/lib/auth";
 import { leaseSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createLease(formData: FormData) {
+  const userId = await getUserId();
   const raw = Object.fromEntries(formData);
   const parsed = leaseSchema.safeParse(raw);
 
@@ -16,6 +18,7 @@ export async function createLease(formData: FormData) {
   const data = parsed.data;
   const lease = await db.lease.create({
     data: {
+      userId,
       propertyId: data.propertyId,
       tenantId: data.tenantId,
       startDate: new Date(data.startDate),
@@ -33,6 +36,7 @@ export async function createLease(formData: FormData) {
 }
 
 export async function updateLease(id: string, formData: FormData) {
+  const userId = await getUserId();
   const raw = Object.fromEntries(formData);
   const parsed = leaseSchema.safeParse(raw);
 
@@ -42,7 +46,7 @@ export async function updateLease(id: string, formData: FormData) {
 
   const data = parsed.data;
   await db.lease.update({
-    where: { id },
+    where: { id, userId },
     data: {
       propertyId: data.propertyId,
       tenantId: data.tenantId,
@@ -61,17 +65,18 @@ export async function updateLease(id: string, formData: FormData) {
 }
 
 export async function deleteLease(id: string) {
-  const paymentCount = await db.payment.count({ where: { leaseId: id } });
+  const userId = await getUserId();
+  const paymentCount = await db.payment.count({ where: { leaseId: id, userId } });
   if (paymentCount > 0) {
     return { error: "Cannot delete lease with recorded payments. Remove payments first." };
   }
 
-  const contractCount = await db.contract.count({ where: { leaseId: id } });
+  const contractCount = await db.contract.count({ where: { leaseId: id, userId } });
   if (contractCount > 0) {
     return { error: "Cannot delete lease with uploaded contracts. Remove contracts first." };
   }
 
-  await db.lease.delete({ where: { id } });
+  await db.lease.delete({ where: { id, userId } });
   revalidatePath("/leases");
   redirect("/leases");
 }
